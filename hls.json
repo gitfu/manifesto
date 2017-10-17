@@ -1,0 +1,6 @@
+[
+{"name": "med960", "aspect": "960x540", "framerate":"30","vbitrate": "2000","abitrate": "96k"}
+,{"name": "low640", "aspect": "640x360", "framerate":"30","vbitrate": "730","abitrate": "96k"}
+,{"name":"hd720","aspect": "1280x720", "framerate" :"30","vbitrate": "4500","abitrate": "96k"}
+
+]
