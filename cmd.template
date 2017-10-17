@@ -1,4 +1,4 @@
-ffmpeg  -y  -ss 0 -t 10 
+ffmpeg  -y  
 -r FRAMERATE
 -i INFILE -f lavfi -fix_sub_duration -i movie=INFILE[out0+subcc]
 -vf scale=ASPECT
