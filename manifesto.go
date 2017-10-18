@@ -41,11 +41,17 @@ func (v *Variant) mkCmd(cmdtemplate string) string {
 	data, err := ioutil.ReadFile(cmdtemplate)
 	chk(err, "Error reading template file")
 	inputs := infile
+	if captioned {
+		inputs = mkCaptionInputs(infile)
+	}
+	if subfile != "" {
+		inputs = mkSubInputs(infile, subfile)
+	}
 	r := strings.NewReplacer("INFILE", inputs, "ASPECT", v.Aspect,
 		"VBITRATE", v.Vbr, "FRAMERATE", v.Rate, "ABITRATE", v.Abr,
 		"TOPLEVEL", toplevel, "NAME", v.Name, "\n", " ")
 	cmd := fmt.Sprintf("%s\n", r.Replace(string(data)))
-
+	fmt.Println(cmd)
 	return cmd
 }
 
@@ -65,10 +71,11 @@ func (v *Variant) start() {
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
-	if captioned {
+	if (captioned) || (subfile != "") {
 		srcdir := fmt.Sprintf("%s/%s", toplevel, v.Name)
 		mvCaptions(srcdir)
 		captioned = false
+		subfile = ""
 	}
 }
 
@@ -113,6 +120,21 @@ func mvCaptions(srcdir string) {
 	}
 }
 
+// return a string for file inputs in the ffmpeg command to extract 608 captions for vtt subtitles
+func mkCaptionInputs(infile string) string {
+	return fmt.Sprintf("%s -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] ", infile, infile)
+}
+
+//return a string for file inputs in the ffmpeg command to use an external subtitle file for vtt subtitles
+func mkSubInputs(infile string, subfile string) string {
+	return fmt.Sprintf("%s -fix_sub_duration -i %s ", infile, subfile)
+}
+
+// return a subtitle stanza for use in the  master.m3u8
+func mkSubStanza() string {
+	return "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"subs/vtt_index.m3u8\"\n"
+}
+
 // Read json file for variants
 func dataToVariants() []Variant {
 	var variants []Variant
@@ -139,16 +161,18 @@ func chk(err error, mesg string) {
 // Make all variants and write master.m3u8
 func mkAll(variants []Variant) {
 	os.MkdirAll(toplevel, 0755)
-	chkCaptions(infile)
+	if subfile == "" {
+		captioned = true
+		chkCaptions(infile)
+	}
 	var m3u8Master = fmt.Sprintf("%s/master.m3u8", toplevel)
 	fp, err := os.Create(m3u8Master)
 	chk(err, "in mkAll")
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	if captioned {
-		w.WriteString("#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\",NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,LANGUAGE=\"en\",URI=\"subs/vtt_index.m3u8\"\n")
-	}
+	w.WriteString(mkSubStanza())
+
 	for _, v := range variants {
 		v.start()
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
@@ -159,9 +183,10 @@ func mkAll(variants []Variant) {
 
 func main() {
 	flag.StringVar(&infile, "i", "", "Video file to segment (required)")
-	flag.StringVar(&toplevel, "d", "", "override top level directory for hls files")
-	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants")
-	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file")
+	flag.StringVar(&subfile, "s", "", "subtitle file to segment (optional)")
+	flag.StringVar(&toplevel, "d", "", "override top level directory for hls files (optional)")
+	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
+	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 
 	flag.Parse()
 	variants := dataToVariants()
@@ -171,6 +196,7 @@ func main() {
 			toplevel = setTop()
 		}
 		fmt.Println("Top level set to ", toplevel)
+		fmt.Println("subfile set to ", subfile)
 
 		mkAll(variants)
 	} else {
