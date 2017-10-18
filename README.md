@@ -28,7 +28,46 @@ Manifesto transcodes and segments video into multiple variants and creates the m
 ### ``` Quick Start```
 
 * ``` go build manifesto.go ```
-* ``` ./manifesto -i video.file ```
+* ``` ./manifesto -i vid.ts ```
+
+This will create the following directory structure and files 
+
+```
+vid:
+hd720  low640  master.m3u8  med960  subs
+
+vid/med960:
+index0.ts  index1.ts  index2.ts  index3.ts  index4.ts  index.m3u8
+
+vid/hd720:
+index0.ts   index1.ts   index2.ts   index3.ts   index4.ts   index.m3u8
+
+vid/low640:
+index0.ts   index1.ts   index2.ts   index3.ts   index4.ts   index.m3u8
+
+vid/subs:
+index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
+```
+
+* The default toplevel directory name is the video file name without the file extention.
+* The variants are read from the hls.json file, variants can be added or removed as needed. 
+* The command used to traanscode is specified in the cmd.template file, it can be modified. 
+
+### ```Command line switches```
+
+```
+  -d string
+    	override top level directory for hls files
+  -i string
+    	Video file to segment (required)
+  -j string
+    	JSON file of variants (default "./hls.json")
+  -t string
+    	command template file (default "./cmd.template")
+```
+
+
+
 
 
 
