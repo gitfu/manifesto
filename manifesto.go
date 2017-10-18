@@ -51,7 +51,7 @@ func (v *Variant) mkCmd(cmdtemplate string) string {
 		"VBITRATE", v.Vbr, "FRAMERATE", v.Rate, "ABITRATE", v.Abr,
 		"TOPLEVEL", toplevel, "NAME", v.Name, "\n", " ")
 	cmd := fmt.Sprintf("%s\n", r.Replace(string(data)))
-	fmt.Println(cmd)
+	//fmt.Println(cmd)
 	return cmd
 }
 
@@ -67,11 +67,11 @@ func (v *Variant) readRate() {
 // Start transcoding the variant
 func (v *Variant) start() {
 	dest := v.mkDest()
-	fmt.Println("Starting ", dest)
+	fmt.Println("\tStarting ", dest,"variant")
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
-	if (captioned) || (subfile != "") {
+	if hasCapsOrSubs() {
 		srcdir := fmt.Sprintf("%s/%s", toplevel, v.Name)
 		mvCaptions(srcdir)
 		captioned = false
@@ -82,9 +82,20 @@ func (v *Variant) start() {
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
-	return fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v,SUBTITLES=\"webvtt\"", v.Bandwidth, v.Aspect)
-
+	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v", v.Bandwidth, v.Aspect)
+	if hasCapsOrSubs() {
+		stanza =fmt.Sprintf("%s,SUBTITLES=\"webvtt\"",stanza)
+		}
+		return stanza
 }
+
+func hasCapsOrSubs()bool{
+	if (captioned) || (subfile != "") {
+		return true
+		}
+		return false
+	}	
+
 
 func chkExec(cmd string) string {
 	// Executes external commands and checks for runtime errors
@@ -115,7 +126,7 @@ func mvCaptions(srcdir string) {
 	for _, f := range files {
 		if strings.Contains(f.Name(), "vtt") {
 			os.Rename(fmt.Sprintf("%s/%s", srcdir, f.Name()), fmt.Sprintf("%s/%s", destdir, f.Name()))
-			fmt.Println(f.Name())
+			fmt.Println("\t\tMoving", f.Name(), "to subs dir")
 		}
 	}
 }
@@ -162,7 +173,6 @@ func chk(err error, mesg string) {
 func mkAll(variants []Variant) {
 	os.MkdirAll(toplevel, 0755)
 	if subfile == "" {
-		captioned = true
 		chkCaptions(infile)
 	}
 	var m3u8Master = fmt.Sprintf("%s/master.m3u8", toplevel)
@@ -171,8 +181,9 @@ func mkAll(variants []Variant) {
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	w.WriteString(mkSubStanza())
-
+	if hasCapsOrSubs(){
+		w.WriteString(mkSubStanza())
+	}
 	for _, v := range variants {
 		v.start()
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
@@ -195,8 +206,7 @@ func main() {
 		if toplevel == "" {
 			toplevel = setTop()
 		}
-		fmt.Println("Top level set to ", toplevel)
-		fmt.Println("subfile set to ", subfile)
+		fmt.Println("\nTop level set to", toplevel)
 
 		mkAll(variants)
 	} else {
