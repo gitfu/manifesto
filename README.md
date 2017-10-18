@@ -54,7 +54,7 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 * The command used to traanscode is specified in the cmd.template file, it can be modified. 
 
 ### ```Command line switches```
-
+```
   -d string
     	override top level directory for hls files (optional)
   -i string
