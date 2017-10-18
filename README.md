@@ -55,15 +55,17 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 ### ```Command line switches```
 
-```
   -d string
-    	override top level directory for hls files
+    	override top level directory for hls files (optional)
   -i string
     	Video file to segment (required)
   -j string
-    	JSON file of variants (default "./hls.json")
+    	JSON file of variants (optional) (default "./hls.json")
+  -s string
+    	subtitle file to segment (optional)
   -t string
-    	command template file (default "./cmd.template")
+    	command template file (optional) (default "./cmd.template")
+
 ```
 
 
