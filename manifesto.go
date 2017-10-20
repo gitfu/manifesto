@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	. "github.com/logrusorgru/aurora"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
-	 . "github.com/logrusorgru/aurora"
-
 )
 
 var infile string
@@ -21,6 +20,7 @@ var jasonfile string
 var cmdtemplate string
 var captioned bool
 var completed string
+
 // Variant struct for HLS variants
 type Variant struct {
 	Name      string `json:"name"`
@@ -69,8 +69,8 @@ func (v *Variant) readRate() {
 // Start transcoding the variant
 func (v *Variant) start() {
 	v.mkDest()
-	fmt.Printf("* Variants: %s %s \r", Green(completed),v.Aspect)
-	completed +=fmt.Sprintf("%s ",v.Aspect)
+	fmt.Printf("* Variants: %s %s \r", Green(completed), v.Aspect)
+	completed += fmt.Sprintf("%s ", v.Aspect)
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
@@ -88,24 +88,23 @@ func (v *Variant) start() {
 func (v *Variant) mkStanza() string {
 	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v", v.Bandwidth, v.Aspect)
 	if hasCapsOrSubs() {
-		stanza =fmt.Sprintf("%s,SUBTITLES=\"webvtt\"",stanza)
-		}
-		return stanza
+		stanza = fmt.Sprintf("%s,SUBTITLES=\"webvtt\"", stanza)
+	}
+	return stanza
 }
 
-func hasSideCar()bool{
-	if subfile !="" {
+func hasSideCar() bool {
+	if subfile != "" {
 		return true
 	}
-	return false	
+	return false
 }
-func hasCapsOrSubs()bool{
+func hasCapsOrSubs() bool {
 	if (captioned) || hasSideCar() {
 		return true
-		}
-		return false
-	}	
-
+	}
+	return false
+}
 
 func chkExec(cmd string) string {
 	// Executes external commands and checks for runtime errors
@@ -164,10 +163,10 @@ func dataToVariants() []Variant {
 
 // Set the toplevel dir for variants by splitting video file name at the "."
 func mkTopLevel() {
-		if toplevel == "" {
-			toplevel = strings.Split(infile, `.`)[0]
-		}
-		os.MkdirAll(toplevel, 0755)
+	if toplevel == "" {
+		toplevel = strings.Split(infile, `.`)[0]
+	}
+	os.MkdirAll(toplevel, 0755)
 }
 
 // Generic catchall error checking
@@ -190,11 +189,11 @@ func mkAll(variants []Variant) {
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	if hasCapsOrSubs(){
+	if hasCapsOrSubs() {
 		w.WriteString(mkSubStanza())
-	}	
-	fmt.Println("\n* Video file:",Cyan(infile),"\n* Toplevel:",Cyan(toplevel),"\n* Subtitle file:",Cyan(subfile),"\n* Captions:",Cyan(captioned) ) 
-	
+	}
+	fmt.Println("\n* Video file:", Cyan(infile), "\n* Toplevel:", Cyan(toplevel), "\n* Subtitle file:", Cyan(subfile), "\n* Captions:", Cyan(captioned))
+
 	for _, v := range variants {
 		v.start()
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
