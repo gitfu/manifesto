@@ -53,11 +53,10 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 ## OR 
 ### ``` Batch Mode (Hell Yes)```
-* ``` ./manifesto -b 'vid.ts vidtwo.ts fu.ts' ```
+* ```./manifesto -b vid.ts,vidtwo,ts fu.ts'  ```
 ### ```the video list has to be either be quoted or comma seperated``` 
 
-sh```
-
+```
 
 leroy@futronic:~/manifesto$ ./manifesto -b 'one.ts two.ts three.ts'
 one.ts
@@ -85,9 +84,9 @@ Extracting captions
 * Toplevel: three 
 * Subtitle file: three/three.srt
 * Variants: 960x540 640x360 1280x720   
-
-
 ```
+
+
 
 * The default toplevel directory name is the video file name without the file extention.
 * The variants are read from the hls.json file, variants can be added or removed as needed. 
