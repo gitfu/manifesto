@@ -77,7 +77,7 @@ func (v *Variant) start() {
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
-	fmt.Printf(" %s Variants: %s  \r",Cyan("."), Cyan(completed),"\n")
+	fmt.Printf(" %s Variants: %s  \r",Cyan("."), Cyan(completed))
 }
 
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
