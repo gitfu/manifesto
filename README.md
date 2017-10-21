@@ -52,12 +52,14 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 ```
 
 ## OR 
-### ``` Batch Mode```
-*     ```Hell yes.```
+### ``` Batch Mode (Hell Yes)```
 * ``` ./manifesto -b 'vid.ts vidtwo.ts fu.ts' ```
 ### ```the video list has to be either be quoted or comma seperated``` 
 
-```@futronic:~/scratch/manifesto$ ./manifesto -b 'one.ts two.ts three.ts'
+sh```
+
+
+leroy@futronic:~/manifesto$ ./manifesto -b 'one.ts two.ts three.ts'
 one.ts
 Extracting captions
 
