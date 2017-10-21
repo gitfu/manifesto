@@ -1,6 +1,6 @@
 ffmpeg  -y  
 -r FRAMERATE
--i INFILE -f lavfi -fix_sub_duration -i movie=INFILE[out0+subcc]
+INPUTS
 -vf scale=ASPECT
 -vcodec libx264  
 -x264-params vbv-bufsize=VBITRATE:vbv-maxrate=VBITRATE:nal_hrd=cbr:no-scenecut=1:bitrate=VBITRATE:keyint=60  
