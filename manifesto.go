@@ -146,24 +146,19 @@ func mkTopLevel() {
 
 func extractCaptions() string {
 	fmt.Println("Extracting captions")
-	assfile := fmt.Sprintf("%s/%s.ass",toplevel, toplevel)
-	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s", infile, assfile)
+	srtfile := fmt.Sprintf("%s/%s.srt",toplevel, toplevel)
+	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s", infile, srtfile)
 	chkExec(cmd)
-	return assfile
+	return srtfile
 }
 
 func mkSubfile() {
-	if webvtt {
-		return
-	} else {
+	if !(webvtt) {
 		addsubs = false
-		if subfile == "" {
-			if hasCaptions() {
+		if (subfile == "") && (hasCaptions()) {
 				subfile = extractCaptions()
 			}
-		}
 		if subfile != "" {
-		
 			addsubs = true
 		}
 	}
@@ -193,8 +188,6 @@ func mkAll(variants []Variant) {
 		if addsubs && !(webvtt) {
 			mvCaptions(v.Name)
 			w.WriteString(mkSubStanza())
-			addsubs = false
-			subfile = ""
 			webvtt = true
 		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
@@ -211,16 +204,14 @@ func main() {
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
-
 	flag.Parse()
-	fmt.Println(batch)
 	variants := dataToVariants()
-
 	if batch != "" {
 		batch = strings.Replace(batch, " ", ",", -1)
 		for _, b := range strings.Split(batch, ",") {
 			fmt.Println(b)
 			webvtt = false
+			subfile = ""
 			infile = b
 			completed = ""
 			toplevel = ""
