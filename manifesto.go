@@ -41,7 +41,7 @@ func (v *Variant) mkDest() string {
 
 func (v *Variant) mkInputs() string {
 	inputs := fmt.Sprintf(" -i %s", infile)
-	if addsubs {
+	if addsubs && !(webvtt) {
 		inputs = fmt.Sprintf(" -i %s -i %s  ", infile, subfile)
 	}
 	return inputs
@@ -72,12 +72,12 @@ func (v *Variant) readRate() {
 // Start transcoding the variant
 func (v *Variant) start() {
 	v.mkDest()
-	fmt.Printf("* Variants: %s %s \r", Cyan(completed), v.Aspect)
+	fmt.Printf(" . Variants: %s %s \r", Cyan(completed), v.Aspect)
 	completed += fmt.Sprintf("%s ", v.Aspect)
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
-	fmt.Printf("* Variants: %s  \r", Cyan(completed))
+	fmt.Printf(" %s Variants: %s  \r",Cyan("."), Cyan(completed),"\n")
 }
 
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
@@ -144,17 +144,20 @@ func mkTopLevel() {
 	os.MkdirAll(toplevel, 0755)
 }
 
+
 func extractCaptions() string {
-	fmt.Println("Extracting captions")
-	srtfile := fmt.Sprintf("%s/%s.srt",toplevel, toplevel)
-	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s", infile, srtfile)
+	fmt.Printf(" . %s",Cyan("Extracting captions \r"))
+	srtfile := fmt.Sprintf("%s/%s.ssa",toplevel, toplevel)
+	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] -r 30 %s", infile, srtfile)
 	chkExec(cmd)
+	fmt.Printf(" %s Caption file: %s \r",Cyan("."),Cyan(infile))
+
 	return srtfile
 }
 
 func mkSubfile() {
-	if !(webvtt) {
 		addsubs = false
+	if !(webvtt) {
 		if (subfile == "") && (hasCaptions()) {
 				subfile = extractCaptions()
 			}
@@ -175,6 +178,7 @@ func chk(err error, mesg string) {
 // Make all variants and write master.m3u8
 func mkAll(variants []Variant) {
 	mkTopLevel()
+	fmt.Println(Cyan(" ."),"Video file:", Cyan(infile), "\n",Cyan("."),"Toplevel:", Cyan(toplevel))
 	mkSubfile()
 	var m3u8Master = fmt.Sprintf("%s/master.m3u8", toplevel)
 	fp, err := os.Create(m3u8Master)
@@ -182,7 +186,7 @@ func mkAll(variants []Variant) {
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	fmt.Println("\n* Video file:", Cyan(infile), "\n* Toplevel:", Cyan(toplevel), "\n* Subtitle file:", Cyan(subfile))
+	fmt.Println("\n",Cyan("."),"Subtitle file:", Cyan(subfile))
 	for _, v := range variants {
 		v.start()
 		if addsubs && !(webvtt) {
@@ -193,7 +197,6 @@ func mkAll(variants []Variant) {
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
 		w.WriteString(fmt.Sprintf("%s/index.m3u8\n", v.Name))
 	}
-	fmt.Println("\n\n")
 	w.Flush()
 }
 
@@ -204,12 +207,15 @@ func main() {
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
+
 	flag.Parse()
 	variants := dataToVariants()
+
 	if batch != "" {
 		batch = strings.Replace(batch, " ", ",", -1)
-		for _, b := range strings.Split(batch, ",") {
-			fmt.Println(b)
+		splitbatch := strings.Split(batch, ",")
+		for i, b := range splitbatch {
+			fmt.Println("\n",Cyan(i+1), "of",len(splitbatch)+1 )
 			webvtt = false
 			subfile = ""
 			infile = b
@@ -227,4 +233,6 @@ func main() {
 		}
 
 	}
+		fmt.Println("\n\n")
+
 }
