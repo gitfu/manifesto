@@ -42,7 +42,7 @@ func (v *Variant) mkDest() string {
 func (v *Variant) mkInputs() string {
 	inputs := fmt.Sprintf(" -i %s", infile)
 	if addsubs {
-		inputs = fmt.Sprintf(" -i %s -i %s/%s  ", infile, toplevel, subfile)
+		inputs = fmt.Sprintf(" -i %s -i %s  ", infile, subfile)
 	}
 	return inputs
 }
@@ -52,7 +52,7 @@ func (v *Variant) mkCmd(cmdtemplate string) string {
 	data, err := ioutil.ReadFile(cmdtemplate)
 	chk(err, "Error reading template file")
 	inputs := v.mkInputs()
-	r := strings.NewReplacer("INFILE", inputs, "ASPECT", v.Aspect,
+	r := strings.NewReplacer("INPUTS", inputs, "ASPECT", v.Aspect,
 		"VBITRATE", v.Vbr, "FRAMERATE", v.Rate, "ABITRATE", v.Abr,
 		"TOPLEVEL", toplevel, "NAME", v.Name, "\n", " ")
 	cmd := fmt.Sprintf("%s\n", r.Replace(string(data)))
@@ -146,8 +146,8 @@ func mkTopLevel() {
 
 func extractCaptions() string {
 	fmt.Println("Extracting captions")
-	assfile := fmt.Sprintf("%s.ass", toplevel)
-	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s/%s", infile, toplevel, assfile)
+	assfile := fmt.Sprintf("%s/%s.ass",toplevel, toplevel)
+	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s", infile, assfile)
 	chkExec(cmd)
 	return assfile
 }
@@ -163,6 +163,7 @@ func mkSubfile() {
 			}
 		}
 		if subfile != "" {
+		
 			addsubs = true
 		}
 	}
@@ -214,7 +215,7 @@ func main() {
 	flag.Parse()
 	fmt.Println(batch)
 	variants := dataToVariants()
-	webvtt = false
+
 	if batch != "" {
 		batch = strings.Replace(batch, " ", ",", -1)
 		for _, b := range strings.Split(batch, ",") {
