@@ -186,9 +186,7 @@ func mkAll(variants []Variant) {
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-
 	fmt.Println("\n* Video file:", Cyan(infile), "\n* Toplevel:", Cyan(toplevel), "\n* Subtitle file:", Cyan(subfile))
-
 	for _, v := range variants {
 		v.start()
 		if addsubs && !(webvtt) {
@@ -197,8 +195,6 @@ func mkAll(variants []Variant) {
 			addsubs = false
 			subfile = ""
 			webvtt = true
-		} else {
-			fmt.Println("webvtt already added")
 		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
 		w.WriteString(fmt.Sprintf("%s/index.m3u8\n", v.Name))
