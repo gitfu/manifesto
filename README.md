@@ -51,16 +51,26 @@ vid/subs:
 index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 ```
 
+#### OR
+* ``` ./manifesto -b 'vid.ts vidtwo.ts fu.ts' ```
+### ```the video list has to be either be quoted or comma seperated``` 
+
+Which does the above for each video listed. 
+
+
+
 * The default toplevel directory name is the video file name without the file extention.
 * The variants are read from the hls.json file, variants can be added or removed as needed. 
 * The command used to traanscode is specified in the cmd.template file, it can be modified. 
 
 ### ```Command line switches```
 ```
+   -b string
+    	batch mode, list multiple input files (either -i or -b is required)
   -d string
     	override top level directory for hls files (optional)
   -i string
-    	Video file to segment (required)
+    	Video file to segment (either -i or -b is required)
   -j string
     	JSON file of variants (optional) (default "./hls.json")
   -s string
