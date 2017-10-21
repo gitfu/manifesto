@@ -14,12 +14,13 @@ import (
 
 var infile string
 var subfile string
+var addsubs bool
 var toplevel string
-
+var webvtt bool
 var jasonfile string
 var cmdtemplate string
-var captioned bool
 var completed string
+var batch string
 
 // Variant struct for HLS variants
 type Variant struct {
@@ -38,17 +39,19 @@ func (v *Variant) mkDest() string {
 	return dest
 }
 
+func (v *Variant) mkInputs() string {
+	inputs := fmt.Sprintf(" -i %s", infile)
+	if addsubs {
+		inputs = fmt.Sprintf(" -i %s -i %s/%s  ", infile, toplevel, subfile)
+	}
+	return inputs
+}
+
 // This Variant method assembles the ffmpeg command
 func (v *Variant) mkCmd(cmdtemplate string) string {
 	data, err := ioutil.ReadFile(cmdtemplate)
 	chk(err, "Error reading template file")
-	inputs := infile
-	if captioned {
-		inputs = mkCaptionInputs(infile)
-	}
-	if hasSideCar() {
-		inputs = mkSubInputs(infile, subfile)
-	}
+	inputs := v.mkInputs()
 	r := strings.NewReplacer("INFILE", inputs, "ASPECT", v.Aspect,
 		"VBITRATE", v.Vbr, "FRAMERATE", v.Rate, "ABITRATE", v.Abr,
 		"TOPLEVEL", toplevel, "NAME", v.Name, "\n", " ")
@@ -69,41 +72,22 @@ func (v *Variant) readRate() {
 // Start transcoding the variant
 func (v *Variant) start() {
 	v.mkDest()
-	fmt.Printf("* Variants: %s %s \r", Green(completed), v.Aspect)
+	fmt.Printf("* Variants: %s %s \r", Cyan(completed), v.Aspect)
 	completed += fmt.Sprintf("%s ", v.Aspect)
 	cmd := v.mkCmd(cmdtemplate)
 	chkExec(cmd)
 	v.readRate()
-	if hasCapsOrSubs() {
-		srcdir := fmt.Sprintf("%s/%s", toplevel, v.Name)
-		mvCaptions(srcdir)
-		captioned = false
-		subfile = ""
-	}
-	fmt.Printf("* Variants: %s  \r", Green(completed))
+	fmt.Printf("* Variants: %s  \r", Cyan(completed))
 }
 
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
 	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v", v.Bandwidth, v.Aspect)
-	if hasCapsOrSubs() {
+	if addsubs {
 		stanza = fmt.Sprintf("%s,SUBTITLES=\"webvtt\"", stanza)
 	}
 	return stanza
-}
-
-func hasSideCar() bool {
-	if subfile != "" {
-		return true
-	}
-	return false
-}
-func hasCapsOrSubs() bool {
-	if (captioned) || hasSideCar() {
-		return true
-	}
-	return false
 }
 
 func chkExec(cmd string) string {
@@ -115,17 +99,18 @@ func chkExec(cmd string) string {
 }
 
 // probes for Closed Captions in video file.
-func chkCaptions(mediafile string) {
-	captioned = false
-	cmd := fmt.Sprintf("ffprobe -i %s", mediafile)
+func hasCaptions() bool {
+	cmd := fmt.Sprintf("ffprobe -i %s", infile)
 	data := chkExec(cmd)
 	if strings.Contains(data, "Captions") {
-		captioned = true
+		return true
 	}
+	return false
 }
 
 // Captions are segmented along with the first variant and then moved to toplevel/subs
-func mvCaptions(srcdir string) {
+func mvCaptions(vardir string) {
+	srcdir := fmt.Sprintf("%s/%s", toplevel, vardir)
 	destdir := fmt.Sprintf("%s/subs", toplevel)
 	os.MkdirAll(destdir, 0755)
 	files, err := ioutil.ReadDir(srcdir)
@@ -135,16 +120,6 @@ func mvCaptions(srcdir string) {
 			os.Rename(fmt.Sprintf("%s/%s", srcdir, f.Name()), fmt.Sprintf("%s/%s", destdir, f.Name()))
 		}
 	}
-}
-
-// return a string for file inputs in the ffmpeg command to extract 608 captions for vtt subtitles
-func mkCaptionInputs(infile string) string {
-	return fmt.Sprintf("%s -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] ", infile, infile)
-}
-
-//return a string for file inputs in the ffmpeg command to use an external subtitle file for vtt subtitles
-func mkSubInputs(infile string, subfile string) string {
-	return fmt.Sprintf("%s -fix_sub_duration -i %s ", infile, subfile)
 }
 
 // return a subtitle stanza for use in the  master.m3u8
@@ -169,6 +144,30 @@ func mkTopLevel() {
 	os.MkdirAll(toplevel, 0755)
 }
 
+func extractCaptions() string {
+	fmt.Println("Extracting captions")
+	assfile := fmt.Sprintf("%s.ass", toplevel)
+	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] %s/%s", infile, toplevel, assfile)
+	chkExec(cmd)
+	return assfile
+}
+
+func mkSubfile() {
+	if webvtt {
+		return
+	} else {
+		addsubs = false
+		if subfile == "" {
+			if hasCaptions() {
+				subfile = extractCaptions()
+			}
+		}
+		if subfile != "" {
+			addsubs = true
+		}
+	}
+}
+
 // Generic catchall error checking
 func chk(err error, mesg string) {
 	if err != nil {
@@ -180,22 +179,27 @@ func chk(err error, mesg string) {
 // Make all variants and write master.m3u8
 func mkAll(variants []Variant) {
 	mkTopLevel()
-	if !(hasSideCar()) {
-		chkCaptions(infile)
-	}
+	mkSubfile()
 	var m3u8Master = fmt.Sprintf("%s/master.m3u8", toplevel)
 	fp, err := os.Create(m3u8Master)
 	chk(err, "in mkAll")
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	if hasCapsOrSubs() {
-		w.WriteString(mkSubStanza())
-	}
-	fmt.Println("\n* Video file:", Cyan(infile), "\n* Toplevel:", Cyan(toplevel), "\n* Subtitle file:", Cyan(subfile), "\n* Captions:", Cyan(captioned))
+
+	fmt.Println("\n* Video file:", Cyan(infile), "\n* Toplevel:", Cyan(toplevel), "\n* Subtitle file:", Cyan(subfile))
 
 	for _, v := range variants {
 		v.start()
+		if addsubs && !(webvtt) {
+			mvCaptions(v.Name)
+			w.WriteString(mkSubStanza())
+			addsubs = false
+			subfile = ""
+			webvtt = true
+		} else {
+			fmt.Println("webvtt already added")
+		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
 		w.WriteString(fmt.Sprintf("%s/index.m3u8\n", v.Name))
 	}
@@ -204,18 +208,35 @@ func mkAll(variants []Variant) {
 }
 
 func main() {
-	flag.StringVar(&infile, "i", "", "Video file to segment (required)")
+	flag.StringVar(&infile, "i", "", "Video file to segment (either -i or -b is required)")
 	flag.StringVar(&subfile, "s", "", "subtitle file to segment (optional)")
 	flag.StringVar(&toplevel, "d", "", "override top level directory for hls files (optional)")
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
+	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
 
 	flag.Parse()
+	fmt.Println(batch)
 	variants := dataToVariants()
-
-	if infile != "" {
-		mkAll(variants)
+	webvtt = false
+	if batch != "" {
+		batch = strings.Replace(batch, " ", ",", -1)
+		for _, b := range strings.Split(batch, ",") {
+			fmt.Println(b)
+			webvtt = false
+			infile = b
+			completed = ""
+			toplevel = ""
+			mkTopLevel()
+			variants := dataToVariants()
+			mkAll(variants)
+		}
 	} else {
-		flag.PrintDefaults()
+		if infile != "" {
+			mkAll(variants)
+		} else {
+			flag.PrintDefaults()
+		}
+
 	}
 }
