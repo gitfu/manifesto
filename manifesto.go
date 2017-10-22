@@ -22,6 +22,9 @@ var jasonfile string
 var cmdtemplate string
 var completed string
 var batch string
+var x264level = "3.0"
+var x264profile = "high"
+var mastercodec ="avc1.64001E,mp4a.40.2"
 
 // Variant struct for HLS variants
 type Variant struct {
@@ -40,7 +43,6 @@ func (v *Variant) mkDest() string {
 	return dest
 }
 
-// generates a string of inputs for the ffmpeg cmd.
 func (v *Variant) mkInputs() string {
 	inputs := fmt.Sprintf(" -i %s", infile)
 	if addsubs && !(webvtt) {
@@ -55,9 +57,11 @@ func (v *Variant) mkCmd(cmdtemplate string) string {
 	chk(err, "Error reading template file")
 	inputs := v.mkInputs()
 	r := strings.NewReplacer("INPUTS", inputs, "ASPECT", v.Aspect,
-		"VBITRATE", v.Vbr, "FRAMERATE", v.Rate, "ABITRATE", v.Abr,
+		"VBITRATE", v.Vbr,"X264LEVEL",x264level,"X264PROFILE",x264profile,
+		"FRAMERATE", v.Rate, "ABITRATE", v.Abr,
 		"TOPLEVEL", toplevel, "NAME", v.Name, "\n", " ")
 	cmd := fmt.Sprintf("%s\n", r.Replace(string(data)))
+	//fmt.Printf(cmd)
 	return cmd
 }
 
@@ -84,15 +88,15 @@ func (v *Variant) start() {
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
-	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v", v.Bandwidth, v.Aspect)
+	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v,CODECS=\"%s\"", v.Bandwidth, v.Aspect,mastercodec)
 	if addsubs {
 		stanza = fmt.Sprintf("%s,SUBTITLES=\"webvtt\"", stanza)
 	}
 	return stanza
 }
 
-// Executes external commands and checks for runtime errors
 func chkExec(cmd string) string {
+	// Executes external commands and checks for runtime errors
 	parts := strings.Fields(cmd)
 	data, err := exec.Command(parts[0], parts[1:]...).CombinedOutput()
 	chk(err, fmt.Sprintf("Error running \n %s \n %v", cmd, string(data)))
@@ -145,16 +149,19 @@ func mkTopLevel() {
 	os.MkdirAll(toplevel, 0755)
 }
 
+//Extract 608 captions to an srt file.
 func extractCaptions() string {
 	fmt.Printf(" . %s", Cyan("extracting captions \r"))
-	srtfile := fmt.Sprintf("%s/%s.ssa", toplevel, toplevel)
-	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] -r 30 %s", infile, srtfile)
+	srtfile := fmt.Sprintf("%s/%s.srt", toplevel, toplevel)
+	cmd := fmt.Sprintf("ffmpeg -y -f lavfi -fix_sub_duration -i movie=%s[out0+subcc] -r 30  -scodec subrip %s", infile, srtfile)
 	chkExec(cmd)
 	fmt.Printf(" %s 608 captions : %s \r", Cyan("."), Cyan(infile))
 
 	return srtfile
 }
 
+// Extract captions to segment, 
+// unless a subtitle file is passed in with "-s"
 func mkSubfile() {
 	addsubs = false
 	if !(webvtt) {
@@ -186,7 +193,7 @@ func mkAll(variants []Variant) {
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	fmt.Println("\n", Cyan("."), "ass file:", Cyan(subfile))
+	fmt.Println("\n", Cyan("."), "srt file:", Cyan(subfile))
 	for _, v := range variants {
 		v.start()
 		if addsubs && !(webvtt) {
@@ -233,7 +240,6 @@ func main() {
 		} else {
 			flag.PrintDefaults()
 		}
-
 	}
 	fmt.Println("\n\n")
 
