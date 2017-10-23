@@ -1,11 +1,22 @@
 ffmpeg  -y  
+-hide_banner 
 -r FRAMERATE
 INPUTS
 -vf scale=ASPECT
 -vcodec libx264  
--x264-params vbv-bufsize=VBITRATE:vbv-maxrate=VBITRATE:nal_hrd=cbr:no-scenecut=1:bitrate=VBITRATE:keyint=60  
+-movflags +faststart
+-pix_fmt yuv420p 
+-tune zerolatency 
+-vprofile X264PROFILE
+-level X264LEVEL
+-preset fast
+-x264-params vbv-bufsize=VBITRATE:vbv-maxrate=VBITRATE:nal_hrd=cbr:no-scenecut=1:bitrate=VBITRATE:keyint=60:keyint_min=60  
 -acodec aac 
--ab ABITRATE 
--hls_time 2 
+-ar 48000 
+-ac 2 
+-b:a ABITRATE 
+-vol 256
+-hls_allow_cache 1
+-hls_time 6
 -hls_list_size 0  
 TOPLEVEL/NAME/index.m3u8
