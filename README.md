@@ -104,6 +104,7 @@ leroy@futronic:~/scratch/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.t
 ```
 ### ``` Variants ```
 
+
 *     Variant data is stored in the hls.json file. 
 *     Add or edit or remove as desired.
 
