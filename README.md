@@ -19,6 +19,11 @@ export GOPATH=~/go
 export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
 ```
+#### ``` Add one library ```
+```
+go get -u github.com/logrusorgru/aurora
+```
+
 #### ```Install ffmpeg with libx264 support```
 
 
@@ -58,35 +63,17 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 ```
 
-leroy@futronic:~/manifesto$ ./manifesto -b 'one.ts two.ts three.ts'
-one.ts
-Extracting captions
+leroy@futronic:~/scratch/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.ts
 
-* Video file: one.ts 
-* Toplevel: one 
-* Subtitle file: one/one.srt
-* Variants: 960x540 640x360 1280x720   
+ 1 of 5
+ . Oct 22 20:17:00
+ . video file   : one.ts
+ . toplevel dir : one
+ . caption file : one.ts 
+ . subtitle file: one/one.vtt
+ . variant sizes: 960x540 768x432 640x360 480x270 1280x720  
 
-
-two.ts
-Extracting captions
-
-* Video file: two.ts 
-* Toplevel: two 
-* Subtitle file: two/two.srt
-* Variants: 960x540 640x360 1280x720   
-
-
-three.ts
-Extracting captions
-
-* Video file: three.ts 
-* Toplevel: three 
-* Subtitle file: three/three.srt
-* Variants: 960x540 640x360 1280x720   
 ```
-
-
 
 * The default toplevel directory name is the video file name without the file extention.
 * The variants are read from the hls.json file, variants can be added or removed as needed. 
