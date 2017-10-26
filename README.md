@@ -27,6 +27,13 @@ go get -u github.com/logrusorgru/aurora
 #### ```Install ffmpeg with libx264 support```
 
 
+#### ```Git clone the repo ```
+```
+git clone https://github.com/gitfu/manifesto
+cd manifesto
+go build manifesto.go
+```
+
 ## ``` How It Works ```
 
 Manifesto transcodes and segments video into multiple variants and creates the master.m3u8 file. 
@@ -34,7 +41,7 @@ Manifesto transcodes and segments video into multiple variants and creates the m
 
 ### ``` Quick Start```
 
-* ``` go build manifesto.go ```
+* ``` cd ~/manifesto ```
 * ``` ./manifesto -i vid.ts ```
 
 This will create the following directory structure and files 
