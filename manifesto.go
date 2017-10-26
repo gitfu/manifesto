@@ -245,8 +245,15 @@ func runBatch() {
 	}
 }
 
+func fixUrlPrefix(){
+	if (urlprefix !="") && (strings.HasSuffix(urlprefix,"/") {
+		urlprefix +="/"
+}		
+
+
 func do() {
 	mkFlags()
+	fixUrlPrefix()
 	if batch != "" {
 		runBatch()
 	} else {
@@ -258,7 +265,7 @@ func do() {
 			flag.PrintDefaults()
 		}
 	}
-	stamp()
+
 }
 
 func mkFlags() {
