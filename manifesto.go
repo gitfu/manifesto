@@ -158,7 +158,6 @@ func dataToVariants() []Variant {
 func mkTopLevel() {
 	if toplevel == "" {
 		toplevel = strings.Split(infile, `.`)[0]
-		fmt.Println(toplevel)
 		if strings.Contains(toplevel,"/"){
 		one:=strings.Split(toplevel,"/")
 		toplevel=one[len(one)-1]
