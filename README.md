@@ -96,7 +96,7 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 
 ### ```Command line switches```
 ```
-   -b string
+  -b string
     	batch mode, list multiple input files (either -i or -b is required)
   -d string
     	override top level directory for hls files (optional)
@@ -108,6 +108,8 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
     	subtitle file to segment (optional)
   -t string
     	command template file (optional) (default "./cmd.template")
+  -u string
+    	url prefix to add to index.m3u8 path in master.m3u8 (optional)
 
 ```
 ### ``` Variants ```
