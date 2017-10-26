@@ -38,6 +38,7 @@ go build manifesto.go
 
 Manifesto transcodes and segments video into multiple variants and creates the master.m3u8 file. 
 608 Closed captions are extracted and converted to webvtt segment files.
+Bandwidth values are automatically calculated to be accurate.
 
 ### ``` Quick Start```
 
@@ -70,7 +71,7 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 ```
 
-leroy@futronic:~/scratch/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.ts
+leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.ts
 
  1 of 5
  . Oct 22 20:17:00
