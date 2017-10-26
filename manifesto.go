@@ -268,7 +268,7 @@ func mkFlags() {
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
-	flag.StringVar(&urlprefix,"-u","","url prefix to add to index.m3u8 path in master.m3u8 (optional)")
+	flag.StringVar(&urlprefix,"u","","url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
 }
 
