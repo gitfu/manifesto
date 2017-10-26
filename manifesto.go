@@ -166,12 +166,12 @@ func mkTopLevel() {
 func extractCaptions() string {
 	fmt.Printf("%s caption file : %s \n", Cyan(" ."), Cyan(infile))
 	fmt.Printf(" . %s", Cyan("extracting captions \r"))
-	vttfile := fmt.Sprintf("%s/%s.vtt", toplevel, toplevel)
+	subfile := fmt.Sprintf("%s.vtt", toplevel)
 	prefix := "ffmpeg -y -f lavfi -fix_sub_duration "
-	postfix := fmt.Sprintf("-i movie=%s[out0+subcc] %s", infile, vttfile)
+	postfix := fmt.Sprintf("-i movie=%s[out0+subcc] %s", infile, subfile)
 	cmd := prefix + postfix
 	chkExec(cmd)
-	return vttfile
+	return subfile
 }
 
 // Extract captions to segment,
@@ -244,6 +244,7 @@ func runBatch() {
 		mkAll(variants)
 	}
 }
+
 func fixUrlPrefix(){
 	if (urlprefix !="") && (strings.HasSuffix(urlprefix,"/")) {
 		urlprefix +="/"
