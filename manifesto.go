@@ -23,6 +23,7 @@ var cmdtemplate string
 var incomplete string
 var completed string
 var batch string
+var urlprefix string
 var x264level = "3.0"
 var x264profile = "high"
 var mastercodec = "avc1.64001E,mp4a.40.2"
@@ -217,7 +218,7 @@ func mkAll(variants []Variant) {
 			webvtt = true
 		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
-		w.WriteString(fmt.Sprintf("%s/index.m3u8\n", v.Name))
+		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n",urlprefix v.Name))
 	}
 	w.Flush()
 }
@@ -267,7 +268,7 @@ func mkFlags() {
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
-
+	flag.Stringvar(&urlprefix,"-u","","url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
 }
 
