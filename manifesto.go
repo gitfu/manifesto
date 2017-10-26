@@ -244,12 +244,11 @@ func runBatch() {
 		mkAll(variants)
 	}
 }
-
 func fixUrlPrefix(){
-	if (urlprefix !="") && (strings.HasSuffix(urlprefix,"/") {
+	if (urlprefix !="") && (strings.HasSuffix(urlprefix,"/")) {
 		urlprefix +="/"
-}		
-
+	}		
+}
 
 func do() {
 	mkFlags()
