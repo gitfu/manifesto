@@ -158,6 +158,11 @@ func dataToVariants() []Variant {
 func mkTopLevel() {
 	if toplevel == "" {
 		toplevel = strings.Split(infile, `.`)[0]
+		fmt.Println(toplevel)
+		if strings.Contains(toplevel,"/"){
+		one:=strings.Split(toplevel,"/")
+		toplevel=one[len(one)-1]
+	}
 	}
 	os.MkdirAll(toplevel, 0755)
 }
@@ -166,7 +171,7 @@ func mkTopLevel() {
 func extractCaptions() string {
 	fmt.Printf("%s caption file : %s \n", Cyan(" ."), Cyan(infile))
 	fmt.Printf(" . %s", Cyan("extracting captions \r"))
-	subfile := fmt.Sprintf("%s.vtt", toplevel)
+	subfile := fmt.Sprintf("%s/%s.vtt",toplevel, toplevel)
 	prefix := "ffmpeg -y -f lavfi -fix_sub_duration "
 	postfix := fmt.Sprintf("-i movie=%s[out0+subcc] %s", infile, subfile)
 	cmd := prefix + postfix
