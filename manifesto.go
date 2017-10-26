@@ -225,6 +225,7 @@ func mkAll(variants []Variant) {
 		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n",urlprefix, v.Name))
 	}
 	w.Flush()
+	fmt.Println()
 }
 
 func stamp() {
