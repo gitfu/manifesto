@@ -135,7 +135,11 @@ func mvCaptions(vardir string) {
 func mkSubStanza() string {
 	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\","
 	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
-	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n",urlprefix)
+	line :=urlprefix
+		if urlprefix !="" {
+			line+=fmt.Sprintf("/%s/",toplevel)
+		}	
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n",line)
 	return one + two + three
 }
 
@@ -222,7 +226,11 @@ func mkAll(variants []Variant) {
 			webvtt = true
 		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
-		w.WriteString(fmt.Sprintf("%s/%s/index.m3u8\n",urlprefix, v.Name))
+		line :=urlprefix
+		if urlprefix !="" {
+			line+=fmt.Sprintf("/%s/",toplevel)
+		}	
+		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n",line, v.Name))
 	}
 	w.Flush()
 	fmt.Println()
@@ -244,22 +252,22 @@ func runBatch() {
 		infile = b
 		completed = ""
 		toplevel = ""
-		fixUrlPrefix()
+		mkTopLevel()
 		variants := dataToVariants()
 		mkAll(variants)
 	}
 }
 
 func fixUrlPrefix(){
-	mkTopLevel()
+	
 	if (urlprefix !="") && !(strings.HasSuffix(urlprefix,"/")) {
 		urlprefix +="/"
 	}
-	urlprefix+=fmt.Sprintf("%s/",toplevel)
 }
 
 func do() {
 	mkFlags()
+	fixUrlPrefix()
 	if batch != "" {
 		runBatch()
 	} else {
