@@ -202,7 +202,7 @@ func chk(err error, mesg string) {
 
 // Make all variants and write master.m3u8
 func mkAll(variants []Variant) {
-	mkTopLevel()
+	fixUrlPrefix()
 	fmt.Println(Cyan(" ."), "video file   :", Cyan(infile))
 	fmt.Println(Cyan(" ."), "toplevel dir :", Cyan(toplevel))
 	mkSubfile()
@@ -244,13 +244,14 @@ func runBatch() {
 		infile = b
 		completed = ""
 		toplevel = ""
-		mkTopLevel()
+		fixUrlPrefix()
 		variants := dataToVariants()
 		mkAll(variants)
 	}
 }
 
 func fixUrlPrefix(){
+	mkTopLevel()
 	if (urlprefix !="") && !(strings.HasSuffix(urlprefix,"/")) {
 		urlprefix +="/"
 	}
@@ -259,7 +260,6 @@ func fixUrlPrefix(){
 
 func do() {
 	mkFlags()
-	fixUrlPrefix()
 	if batch != "" {
 		runBatch()
 	} else {
