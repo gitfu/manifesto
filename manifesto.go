@@ -135,7 +135,7 @@ func mvCaptions(vardir string) {
 func mkSubStanza() string {
 	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\","
 	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
-	three := "LANGUAGE=\"en\",URI=\"subs/vtt_index.m3u8\"\n"
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%s%ssubs/vtt_index.m3u8\"\n",toplevel,urlprefix)
 	return one + two + three
 }
 
