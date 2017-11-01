@@ -135,7 +135,7 @@ func mvCaptions(vardir string) {
 func mkSubStanza() string {
 	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\","
 	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
-	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%s/%s/subs/vtt_index.m3u8\"\n",urlprefix,toplevel)
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n",urlprefix)
 	return one + two + three
 }
 
@@ -251,9 +251,10 @@ func runBatch() {
 }
 
 func fixUrlPrefix(){
-	if (urlprefix !="") && (strings.HasSuffix(urlprefix,"/")) {
+	if (urlprefix !="") && !(strings.HasSuffix(urlprefix,"/")) {
 		urlprefix +="/"
-	}		
+	}
+	urlprefix+=fmt.Sprintf("%s/",toplevel)
 }
 
 func do() {
