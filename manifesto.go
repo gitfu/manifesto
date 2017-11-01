@@ -135,8 +135,8 @@ func mvCaptions(vardir string) {
 func mkSubStanza() string {
 	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"webvtt\","
 	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
-	line :=mkLine()
-	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n",line)
+	line := mkLine()
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n", line)
 	return one + two + three
 }
 
@@ -159,10 +159,10 @@ func dataToVariants() []Variant {
 func mkTopLevel() {
 	if toplevel == "" {
 		toplevel = strings.Split(infile, `.`)[0]
-		if strings.Contains(toplevel,"/"){
-		one:=strings.Split(toplevel,"/")
-		toplevel=one[len(one)-1]
-	}
+		if strings.Contains(toplevel, "/") {
+			one := strings.Split(toplevel, "/")
+			toplevel = one[len(one)-1]
+		}
 	}
 	os.MkdirAll(toplevel, 0755)
 }
@@ -171,7 +171,7 @@ func mkTopLevel() {
 func extractCaptions() string {
 	fmt.Printf("%s caption file : %s \n", Cyan(" ."), Cyan(infile))
 	fmt.Printf(" . %s", Cyan("extracting captions \r"))
-	subfile := fmt.Sprintf("%s/%s.vtt",toplevel, toplevel)
+	subfile := fmt.Sprintf("%s/%s.vtt", toplevel, toplevel)
 	prefix := "ffmpeg -y -f lavfi -fix_sub_duration "
 	postfix := fmt.Sprintf("-i movie=%s[out0+subcc] %s", infile, subfile)
 	cmd := prefix + postfix
@@ -223,8 +223,8 @@ func mkAll(variants []Variant) {
 			webvtt = true
 		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
-		line :=mkLine()
-		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n",line, v.Name))
+		line := mkLine()
+		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n", line, v.Name))
 	}
 	w.Flush()
 	fmt.Println()
@@ -252,17 +252,16 @@ func runBatch() {
 	}
 }
 func mkLine() string {
-	line :=urlprefix
-		if urlprefix !="" {
-			line+=fmt.Sprintf("%s/",toplevel)
-		}
+	line := urlprefix
+	if urlprefix != "" {
+		line += fmt.Sprintf("%s/", toplevel)
+	}
 	return line
-}	
+}
 
-func fixUrlPrefix(){
-	
-	if (urlprefix !="") && !(strings.HasSuffix(urlprefix,"/")) {
-		urlprefix +="/"
+func fixUrlPrefix() {
+	if (urlprefix != "") && !(strings.HasSuffix(urlprefix, "/")) {
+		urlprefix += "/"
 	}
 }
 
@@ -290,7 +289,7 @@ func mkFlags() {
 	flag.StringVar(&jasonfile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&cmdtemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&batch, "b", "", "batch mode, list multiple input files (either -i or -b is required)")
-	flag.StringVar(&urlprefix,"u","","url prefix to add to index.m3u8 path in master.m3u8 (optional)")
+	flag.StringVar(&urlprefix, "u", "", "url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
 }
 
