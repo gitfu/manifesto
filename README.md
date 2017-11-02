@@ -112,7 +112,7 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 
 ```
 
-### ``` /usage ```
+### ``` Usage ```
 
 ```
 ./manifesto -i vid.mp4
