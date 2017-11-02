@@ -14,10 +14,8 @@ Manifesto is an HLS tool for creating multiple variants, a master.m3u8 file, and
 
 #### ```Set your Environment```
 ```
-mkdir -p ~/go/bin
+mkdir  ~/go
 export GOPATH=~/go
-export GOBIN=$GOPATH/bin
-export PATH=$PATH:$GOBIN
 ```
 #### ``` Add one library ```
 ```
