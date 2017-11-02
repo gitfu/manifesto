@@ -40,7 +40,7 @@ Manifesto transcodes and segments video into multiple variants and creates the m
 608 Closed captions are extracted and converted to webvtt segment files.
 Bandwidth values are automatically calculated to be accurate.
 
-### ``` Quick Start```
+## ``` Quick Start```
 
 * ``` cd ~/manifesto ```
 * ``` ./manifesto -i vid.ts ```
@@ -112,7 +112,7 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 
 ```
 
-### ``` Usage ```
+## ``` Usage ```
 
 ```
 ./manifesto -i vid.mp4
@@ -153,7 +153,7 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 
 
 
-###  ```Variants``` 
+##  ```Variants``` 
 
 
 * Variant data is stored in the hls.json file. 
