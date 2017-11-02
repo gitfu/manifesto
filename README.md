@@ -118,7 +118,7 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 ./manifesto -i vid.mp4
 ```
 
-*This is single mode a master.m3u8 and variants will be created in a new directory named vid. It will also attempt to extract 608 captions and convert them to segmented webvtt subtitles. 
+* This is single mode a master.m3u8 and variants will be created in a new directory named vid. It will also attempt to extract 608 captions and convert them to segmented webvtt subtitles. 
 
 ###
 
@@ -126,28 +126,28 @@ leroy@futronic:~/manifesto$ ./manifesto -b one.ts,two.ts,three.ts,four.ts,five.t
 ```
 ./manifesto -i vid.mp4 -s sub.srt
 ```
-*As above but instead of extracting 608 captions, sub.srt will be converted to a webvtt file and then segmented.
+* As above but instead of extracting 608 captions, sub.srt will be converted to a webvtt file and then segmented.
 
 ###
 
 ```
 ./manifesto -i vid.mp4 -s sub.srt -u http://example.com
 ```
-*As above and also adds the url prefix to each variant listed in the m3u8 file. 
+* As above and also adds the url prefix to each variant listed in the m3u8 file. 
 
 ###
 
 ```
 ./manifesto -b a.mov,b.mp4,c.ts,d.mpg 
 ```
-*This is batch mode and it will create directories, a master.m3u8 and variants for each of the files listed. It will also attempt to extracted 608 captions and convert them to segmented webvtt subtitles for each of them. 
+* This is batch mode and it will create directories, a master.m3u8 and variants for each of the files listed. It will also attempt to extracted 608 captions and convert them to segmented webvtt subtitles for each of them. 
 ###
 
 
 ```
 ./manifesto -b a.mov,b.mp4,c.ts,d.mpg -u http://example.com
 ```
-*Does as above but adds the url prefix to each of the variants listed in the m3u8.
+* Does as above but adds the url prefix to each of the variants listed in the m3u8.
 
 
 
