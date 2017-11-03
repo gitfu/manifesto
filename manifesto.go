@@ -267,6 +267,7 @@ func fixUrlPrefix() {
 
 func do() {
 	mkFlags()
+	mkTopLevel()
 	fixUrlPrefix()
 	if batch != "" {
 		runBatch()
