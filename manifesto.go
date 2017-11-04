@@ -13,10 +13,9 @@ import (
 	"time"
 )
 
-var x264level = "3.0"
+var x264level = "3.0"/
 var x264profile = "high"
 var mastercodec = "avc1.64001E,mp4a.40.2"
-var batch string
 
 type Job struct {
 	InFile      string
@@ -38,33 +37,8 @@ func (j *Job) mkFlags() {
 	flag.StringVar(&j.TopLevel, "d", "", "override top level directory for hls files (optional)")
 	flag.StringVar(&j.JasonFile, "j", `./hls.json`, "JSON file of variants (optional)")
 	flag.StringVar(&j.CmdTemplate, "t", `./cmd.template`, "command template file (optional)")
-	flag.StringVar(&batch, "b", "", "Batchmode, list multiple input files (either -i or -b is required)")
 	flag.StringVar(&j.UrlPrefix, "u", "", "url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
-}
-
-// probes for Closed Captions in video file.
-func (j *Job) hasCaptions() bool {
-	cmd := fmt.Sprintf("ffprobe -i %s", j.InFile)
-	data := chkExec(cmd)
-	if strings.Contains(data, "Captions") {
-		return true
-	}
-	return false
-}
-
-// Captions are segmented along with the first variant and then moved to toplevel/subs
-func (j *Job) mvCaptions(vardir string) {
-	srcdir := fmt.Sprintf("%s/%s", j.TopLevel, vardir)
-	destdir := fmt.Sprintf("%s/subs", j.TopLevel)
-	os.MkdirAll(destdir, 0755)
-	files, err := ioutil.ReadDir(srcdir)
-	chk(err, "Error moving Captions")
-	for _, f := range files {
-		if strings.Contains(f.Name(), "vtt") {
-			os.Rename(fmt.Sprintf("%s/%s", srcdir, f.Name()), fmt.Sprintf("%s/%s", destdir, f.Name()))
-		}
-	}
 }
 
 // Read json file for variants
@@ -104,6 +78,30 @@ func (j *Job) extractCaptions() {
 
 }
 
+// probes for Closed Captions in video file.
+func (j *Job) hasCaptions() bool {
+	cmd := fmt.Sprintf("ffprobe -i %s", j.InFile)
+	data := chkExec(cmd)
+	if strings.Contains(data, "Captions") {
+		return true
+	}
+	return false
+}
+
+// Captions are segmented along with the first variant and then moved to toplevel/subs
+func (j *Job) mvCaptions(vardir string) {
+	srcdir := fmt.Sprintf("%s/%s", j.TopLevel, vardir)
+	destdir := fmt.Sprintf("%s/subs", j.TopLevel)
+	os.MkdirAll(destdir, 0755)
+	files, err := ioutil.ReadDir(srcdir)
+	chk(err, "Error moving Captions")
+	for _, f := range files {
+		if strings.Contains(f.Name(), "vtt") {
+			os.Rename(fmt.Sprintf("%s/%s", srcdir, f.Name()), fmt.Sprintf("%s/%s", destdir, f.Name()))
+		}
+	}
+}
+
 // Extract captions to segment,
 // unless a subtitle file is passed in with "-s"
 func (j *Job) mkSubfile() {
@@ -118,9 +116,17 @@ func (j *Job) mkSubfile() {
 	}
 }
 
+// create a subtitle stanza for use in the  master.m3u8
+func (j *Job) mkSubStanza() string {
+	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"WebVtt\","
+	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
+	line := j.mkLine()
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n", line)
+	return one + two + three
+}
+
 // Make all variants and write master.m3u8
 func (j *Job) mkAll() {
-	j.fixUrlPrefix()
 	fmt.Println(Cyan(" ."), "video file   :", Cyan(j.InFile))
 	fmt.Println(Cyan(" ."), "TopLeveldir :", Cyan(j.TopLevel))
 	j.mkSubfile()
@@ -162,13 +168,19 @@ func (j *Job) fixUrlPrefix() {
 	}
 }
 
-func (j *Job) mkSubStanza() string {
-	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"WebVtt\","
-	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
-	line := j.mkLine()
-	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n", line)
-	return one + two + three
+func (j *Job) do() {
+	j.mkFlags()
+	if j.InFile != "" {
+		j.mkTopLevel()
+		j.fixUrlPrefix()
+		j.dataToVariants()
+		j.mkAll()
+	} else {
+		flag.PrintDefaults()
+	}
 }
+
+// End Job
 
 // Variant struct for HLS variants
 type Variant struct {
@@ -178,7 +190,7 @@ type Variant struct {
 	Rate      string `json:"framerate"`
 	Vbr       string `json:"vbitrate"`
 	Abr       string `json:"abitrate"`
-	Buf       string
+	Buf       string `json:"bufsize"`
 	Bandwidth string
 }
 
@@ -243,6 +255,8 @@ func (v *Variant) mkStanza() string {
 	return stanza
 }
 
+// End Variant
+
 func chkExec(cmd string) string {
 	// Executes external commands and checks for runtime errors
 	parts := strings.Fields(cmd)
@@ -250,8 +264,6 @@ func chkExec(cmd string) string {
 	chk(err, fmt.Sprintf("Error running \n %s \n %v", cmd, string(data)))
 	return string(data)
 }
-
-// return a subtitle stanza for use in the  master.m3u8
 
 // Generic catchall error checking
 func chk(err error, mesg string) {
@@ -266,45 +278,9 @@ func stamp() {
 	fmt.Println(Cyan(" ."), Cyan(t.Format(time.Stamp)))
 }
 
-/**
-func runBatch() {
-	Batch= strings.Replace(batch, " ", ",", -1)
-	splitBatch:= strings.Split(batch, ",")
-	for i, b := range splitBatch{
-		fmt.Println("\n", Cyan(i+1), "of", len(splitbatch))
-		stamp()
-		WebVtt = false
-		SubFile = ""
-		InFile = b
-		Completed = ""
-		TopLevel= ""
-		mkTopLevel()
-		variants := dataToVariants()
-		mkAll(variants)
-	}
-}
-**/
-func do() {
-
-	/**	if Batch!= "" {
-			runBatch()
-		} else {
-	**/
+func main() {
 	stamp()
 	var j Job
-	j.mkFlags()
-	if j.InFile != "" {
-
-		j.mkTopLevel()
-		j.fixUrlPrefix()
-		j.dataToVariants()
-		j.mkAll()
-	} else {
-		flag.PrintDefaults()
-	}
-}
-
-func main() {
-	do()
+	j.do()
 
 }
