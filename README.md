@@ -1,4 +1,4 @@
-****[![Go Report Card](https://goreportcard.com/badge/github.com/gitfu/manifesto)](https://goreportcard.com/report/github.com/gitfu/manifesto)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gitfu/manifesto)](https://goreportcard.com/report/github.com/gitfu/manifesto)
 
 # Manifesto
 Manifesto is an HLS tool for creating multiple variants, a master.m3u8 file, and converting 608 captions to segmented webvtt subtitles via ffmpeg.
@@ -117,10 +117,9 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 ```
 [
-{"name": "med960", "aspect": "960x540", "framerate":"29.97","vbitrate": "2000","abitrate": "96k"}
-,{"name": "low640", "aspect": "640x360", "framerate":"29.97","vbitrate": "730","abitrate": "64k"}
-,{"name":"hd720","aspect": "1280x720", "framerate" :"29.97","vbitrate": "4500","abitrate": "128k"}
-
+{"name": "med960", "aspect": "960x540", "framerate":"29.97","vbitrate": "2000","bufsize":"4000","abitrate": "96k"}
+,{"name": "low640", "aspect": "640x360", "framerate":"29.97","vbitrate": "730","bufsize":"1460","abitrate": "64k"}
+,{"name":"hd720","aspect": "1280x720", "framerate" :"29.97","vbitrate": "4500","bufsize":"9000","abitrate": "128k"}
 ]
 ```
 
