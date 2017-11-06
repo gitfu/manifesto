@@ -128,11 +128,6 @@ func (j *Job) mkSubStanza() string {
 func (j *Job) doVariant(v Variant){
 		v.job = j
 		v.start()
-		if j.AddSubs && !(j.WebVtt) {
-			j.mvSubtitles(v.Name)
-			w.WriteString(j.mkSubStanza())
-			j.WebVtt = true
-		}
 }
 
 // Make all variants and write master.m3u8
@@ -150,6 +145,11 @@ func (j *Job) mkAll() {
 	j.mkIncomplete()
 	for _, v := range j.Variants {
 		j.doVariant(v)
+		if j.AddSubs && !(j.WebVtt) {
+			j.mvSubtitles(v.Name)
+			w.WriteString(j.mkSubStanza())
+			j.WebVtt = true
+		}
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
 		line := j.mkLine()
 		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n", line, v.Name))
