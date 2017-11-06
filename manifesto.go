@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var x264level = "3.0"/
+var x264level = "3.0"
 var x264profile = "high"
 var mastercodec = "avc1.64001E,mp4a.40.2"
 
@@ -89,7 +89,7 @@ func (j *Job) hasCaptions() bool {
 }
 
 // Captions are segmented along with the first variant and then moved to toplevel/subs
-func (j *Job) mvCaptions(vardir string) {
+func (j *Job) mvSubtitles(vardir string) {
 	srcdir := fmt.Sprintf("%s/%s", j.TopLevel, vardir)
 	destdir := fmt.Sprintf("%s/subs", j.TopLevel)
 	os.MkdirAll(destdir, 0755)
@@ -142,7 +142,7 @@ func (j *Job) mkAll() {
 		v.job = j
 		v.start()
 		if j.AddSubs && !(j.WebVtt) {
-			j.mvCaptions(v.Name)
+			j.mvSubtitles(v.Name)
 			w.WriteString(j.mkSubStanza())
 			j.WebVtt = true
 		}
