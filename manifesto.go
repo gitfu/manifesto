@@ -125,6 +125,16 @@ func (j *Job) mkSubStanza() string {
 	return one + two + three
 }
 
+func (j *Job) doVariant(v Variant){
+		v.job = j
+		v.start()
+		if j.AddSubs && !(j.WebVtt) {
+			j.mvSubtitles(v.Name)
+			w.WriteString(j.mkSubStanza())
+			j.WebVtt = true
+		}
+}
+
 // Make all variants and write master.m3u8
 func (j *Job) mkAll() {
 	fmt.Println(Cyan(" ."), "video file   :", Cyan(j.InFile))
@@ -139,18 +149,12 @@ func (j *Job) mkAll() {
 	fmt.Println(Cyan(" ."), "subtitle file:", Cyan(j.SubFile))
 	j.mkIncomplete()
 	for _, v := range j.Variants {
-		v.job = j
-		v.start()
-		if j.AddSubs && !(j.WebVtt) {
-			j.mvSubtitles(v.Name)
-			w.WriteString(j.mkSubStanza())
-			j.WebVtt = true
-		}
+		j.doVariant(v)
 		w.WriteString(fmt.Sprintf("%s\n", v.mkStanza()))
 		line := j.mkLine()
 		w.WriteString(fmt.Sprintf("%s%s/index.m3u8\n", line, v.Name))
+		w.Flush()
 	}
-	w.Flush()
 	fmt.Println()
 }
 
@@ -215,7 +219,7 @@ func (v *Variant) mkCmd(CmdTemplate string) string {
 	chk(err, "Error reading template file")
 	inputs := v.mkInputs()
 	r := strings.NewReplacer("INPUTS", inputs, "ASPECT", v.Aspect,
-		"VBITRATE", v.Vbr, "X264LEVEL", x264level,
+		"VBITRATE", v.Vbr,"BUFSIZE",v.Buf, "X264LEVEL", x264level,
 		"X264PROFILE", x264profile, "FRAMERATE", v.Rate,
 		"ABITRATE", v.Abr, "TOPLEVEL", v.job.TopLevel,
 		"NAME", v.Name, "\n", " ")
