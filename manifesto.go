@@ -125,10 +125,6 @@ func (j *Job) mkSubStanza() string {
 	return one + two + three
 }
 
-func (j *Job) doVariant(v Variant){
-		v.job = j
-		v.start()
-}
 
 // Make all variants and write master.m3u8
 func (j *Job) mkAll() {
@@ -144,7 +140,8 @@ func (j *Job) mkAll() {
 	fmt.Println(Cyan(" ."), "subtitle file:", Cyan(j.SubFile))
 	j.mkIncomplete()
 	for _, v := range j.Variants {
-		j.doVariant(v)
+		v.job = j
+		v.start()
 		if j.AddSubs && !(j.WebVtt) {
 			j.mvSubtitles(v.Name)
 			w.WriteString(j.mkSubStanza())
