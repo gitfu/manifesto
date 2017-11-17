@@ -3,13 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	
 )
 
 func main() {
 	
-
-
-
 jason :=[]byte (`
  {
     "streams": [
@@ -171,10 +169,24 @@ jason :=[]byte (`
         "probe_score": 50
     }
 }
-
 `)
-type Format map[string]interface{}
-type Stream map[string]interface{}
+
+type Format struct{
+	FormatName 	string	`json:"format_name"`
+	Duration	string	`json:"duration"`
+	BitRate		string	`json:"bit_rate"`
+}	
+
+type Stream struct {
+CodecType 	string 	`json:"codec_type"`
+CodecName	string 	`json:"codec_name"`
+Profile 	string	`json:"profile"`	
+Level		float64	`json:"level"`
+Width		float64	`json:"width"`
+Height		float64	`json:"height"`	
+	
+}		
+
 type Container struct {
 Streams	[]Stream	`json:"streams"`
 Format	Format		`json:"format"`	
@@ -183,12 +195,13 @@ Format	Format		`json:"format"`
 var f Container
 json.Unmarshal(jason, &f)
 
-fmt.Println(f.Format["bit_rate"])
+fmt.Println(f.Format)
 for _,i := range f.Streams{
-	if i["codec_type"]=="video"{
-	fmt.Println(i["codec_name"],i["level"],i["profile"],i["width"],i["height"])
-		
+	if i.CodecType=="video" {
+	fmt.Println(i)
+	
+	fmt.Printf("%x",int(i.Level))
 	}
+}
+}
 
-}
-}
