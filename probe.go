@@ -208,24 +208,28 @@ st.Bandwidth=f.Format.BitRate
 for _,i := range f.Streams{
 	
 	if i.CodecType=="video" {
-	st.Resolution= fmt.Sprintf("=%vx%v",i.Width,i.Height)
-	if i.Profile=="High"{ 
-		st.Profile="64"
+		st.Resolution= fmt.Sprintf("=%vx%v",i.Width,i.Height)
+		if i.Profile=="High"{ 
+			st.Profile="64"
+		}
+		if i.Profile =="Main"{
+			st.Profile="4d"
+		}		
+		if i.Profile =="Baseline"{
+			st.Profile="42"
+		}		
+		st.Level=i.Level
+	
+		}
+	if i.CodecType=="audio" {
+		if i.Profile =="HE-AACv2"{
+			st.Acodec="mp4a.40.5"
+		}
+		if i.Profile =="LC" {
+			st.Acodec="mp4a.40.2"
+		}
 	}
-	if i.Profile =="Main"{
-		st.Profile="4d"
-	}		
-	if i.Profile =="Baseline"{
-		st.Profile="42"
-	}		
-	st.Level=i.Level
-	
-	}
-	
-	
-	
 }
-fmt.Printf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x,mp4a.40.2\"\n",st.Bandwidth,st.Resolution,st.Profile,int(st.Level))
+fmt.Printf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x,%v\"\n",st.Bandwidth,st.Resolution,st.Profile,int(st.Level),st.Acodec)
 
 }
-
