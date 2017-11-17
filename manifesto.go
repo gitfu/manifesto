@@ -13,38 +13,35 @@ import (
 	"time"
 )
 
+var x264Profiles = map[string]string{"Baseline": "42", "Main": "4d", "High": "64"}
+var AudioProfiles = map[string]string{"HE-AACv2": "mp4a.40.5", "LC": "mp4a.40.2"}
 
-x264Profiles := map[string]string{"Baseline":"42","Main": "4d","High": "64"}
-AudioProfiles := map[string]string{"HE-AACv2":"mp4a.40.5","LC":"mp4a.40.2"}
-	
-
-type Format struct{
-	FormatName 	string	`json:"format_name"`
-	Duration	string	`json:"duration"`
-	BitRate		string	`json:"bit_rate"`
-}	
+type Format struct {
+	FormatName string `json:"format_name"`
+	Duration   string `json:"duration"`
+	BitRate    string `json:"bit_rate"`
+}
 
 type Stream struct {
-CodecType 	string 	`json:"codec_type"`
-CodecName	string 	`json:"codec_name"`
-Profile 	string	`json:"profile"`	
-Level		float64	`json:"level"`
-Width		float64	`json:"width"`
-Height		float64	`json:"height"`	
-	
-}		
+	CodecType string  `json:"codec_type"`
+	CodecName string  `json:"codec_name"`
+	Profile   string  `json:"profile"`
+	Level     float64 `json:"level"`
+	Width     float64 `json:"width"`
+	Height    float64 `json:"height"`
+}
 
 type Container struct {
-Streams	[]Stream	`json:"streams"`
-Format	Format		`json:"format"`	
-}	
+	Streams []Stream `json:"streams"`
+	Format  Format   `json:"format"`
+}
 
-type Stanza struct { 
-Bandwidth	string
-Resolution	string
-Level		float64
-Profile		string
-AProfile	string
+type Stanza struct {
+	Bandwidth  string
+	Resolution string
+	Level      float64
+	Profile    string
+	AProfile   string
 }
 
 type Job struct {
@@ -112,7 +109,7 @@ func (j *Job) extractCaptions() {
 func (j *Job) hasCaptions() bool {
 	cmd := fmt.Sprintf("ffprobe -i %s", j.InFile)
 	data := chkExec(cmd)
-	if strings.Contains(data, "Captions") {
+	if strings.Contains(string(data), "Captions") {
 		return true
 	}
 	return false
@@ -154,7 +151,6 @@ func (j *Job) mkSubStanza() string {
 	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n", line)
 	return one + two + three
 }
-
 
 // Make all variants and write master.m3u8
 func (j *Job) mkAll() {
@@ -246,23 +242,13 @@ func (v *Variant) mkCmd(CmdTemplate string) string {
 	chk(err, "Error reading template file")
 	inputs := v.mkInputs()
 	r := strings.NewReplacer("INPUTS", inputs, "ASPECT", v.Aspect,
-		"VBITRATE", v.Vbr,"BUFSIZE",v.Buf, "X264LEVEL", x264level,
-		"X264PROFILE", x264profile, "FRAMERATE", v.Rate,
+		"VBITRATE", v.Vbr, "BUFSIZE", v.Buf, "FRAMERATE", v.Rate,
 		"ABITRATE", v.Abr, "TOPLEVEL", v.job.TopLevel,
 		"NAME", v.Name, "\n", " ")
 	cmd := fmt.Sprintf("%s\n", r.Replace(string(data)))
 	return cmd
 }
 
-/** Read actual bitrate from first segment to set bandwidth in master.m3u8
-func (v *Variant) readRate() {
-	cmd := fmt.Sprintf("ffprobe -i %s/%s/index0.ts", v.job.TopLevel, v.Name)
-	data := chkExec(cmd)
-	two := strings.Split(data, "bitrate: ")[1]
-	rate := strings.Split(two, " kb/s")[0]
-	v.Bandwidth = fmt.Sprintf("%v000", rate)
-}
-**/
 // Start transcoding the variant
 func (v *Variant) start() {
 	v.mkDest()
@@ -272,46 +258,45 @@ func (v *Variant) start() {
 	v.job.Incomplete = strings.Replace(v.job.Incomplete, it, "", 1)
 	cmd := v.mkCmd(v.job.CmdTemplate)
 	chkExec(cmd)
-	v.readRate()
+	//	v.readRate()
 	fmt.Printf(" %s variant sizes: %s%s \r", Cyan("."), Cyan(v.job.Completed), v.job.Incomplete)
 }
 
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
-	cmd := fmt.Sprintf(ffprobe -i %s/%s/index0.ts -show_streams -show_format -print_format json", v.job.TopLevel, v.Name)
-	data := chkExec(cmd)	
-	var st Stanza						
+	cmd := fmt.Sprintf("ffprobe -hide_banner -i %s/%s/index0.ts -show_streams -show_format -print_format json ", v.job.TopLevel, v.Name)
+	data := (chkExec(cmd))
+	var st Stanza
 	var f Container
 	json.Unmarshal(data, &f)
-
-	st.Bandwidth=f.Format.BitRate
-	for _,i := range f.Streams{	
-		if i.CodecType=="video" {
-			st.Resolution= fmt.Sprintf("=%vx%v",i.Width,i.Height)
-			st.Profile=x264Profiles[i.Profile]
-			st.Level=i.Level
-			}
-		if i.CodecType=="audio" {
-			st.AProfile=","+AudioProfiles[i.Profile]	
+	st.Bandwidth = f.Format.BitRate
+	for _, i := range f.Streams {
+		if i.CodecType == "video" {
+			st.Resolution = fmt.Sprintf("=%vx%v", i.Width, i.Height)
+			st.Profile = x264Profiles[i.Profile]
+			st.Level = i.Level
+		}
+		if i.CodecType == "audio" {
+			st.AProfile = "," + AudioProfiles[i.Profile]
 		}
 	}
-	return fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\"\n",st.Bandwidth,st.Resolution,st.Profile,int(st.Level),st.AProfile)
+	m3u8Stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\"", st.Bandwidth, st.Resolution, st.Profile, int(st.Level), st.AProfile)
 
-	//if v.job.AddSubs {
-	//	stanza = fmt.Sprintf("%s,SUBTITLES=\"WebVtt\"", stanza)
+	if v.job.AddSubs {
+		m3u8Stanza = fmt.Sprintf("%s,SUBTITLES=\"WebVtt\"", m3u8Stanza)
 	}
-	return stanza
+	return m3u8Stanza
 }
 
 // End Variant
 
-func chkExec(cmd string) string {
+func chkExec(cmd string) []byte {
 	// Executes external commands and checks for runtime errors
 	parts := strings.Fields(cmd)
-	data, err := exec.Command(parts[0], parts[1:]...).CombinedOutput()
+	data, err := exec.Command(parts[0], parts[1:]...).Output()
 	chk(err, fmt.Sprintf("Error running \n %s \n %v", cmd, string(data)))
-	return string(data)
+	return data
 }
 
 // Generic catchall error checking
