@@ -273,7 +273,7 @@ func (v *Variant) mkStanza() string {
 	st.Bandwidth = f.Format.BitRate
 	for _, i := range f.Streams {
 		if i.CodecType == "video" {
-			st.Resolution = fmt.Sprintf("=%vx%v", i.Width, i.Height)
+			st.Resolution = fmt.Sprintf("%vx%v", i.Width, i.Height)
 			st.Profile = x264Profiles[i.Profile]
 			st.Level = i.Level
 		}
