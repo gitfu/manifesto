@@ -109,6 +109,12 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 
 
 
+# How to Modify
+
+* manifesto  works right of the box.I wanted it to be easy to use with minimal configuation needed. 
+If you do feel the need to tune it a bit. 
+
+
 ##  ```Variants``` 
 
 
@@ -124,12 +130,14 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 ```
 
 ## ```Modifying The Ffmpeg Command```
+
+
 * cmd.template is the default ffmeg command template 
 * NAME,ASPECT,FRAMERATE,VBITRATE,BUFSIZE,ABITRATE will be replaced with variant's values from hls.json.
 * Newlines are stripped. 
 
  
- ## Values in the master.m3u8 file
+ ## ```Values in the master.m3u8 file```
  
 The values used in the master.m3u8 file are read an /or calculated for each variant 
 as follows.
