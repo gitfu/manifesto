@@ -37,13 +37,15 @@ go build manifesto.go
 Manifesto transcodes and segments video into multiple variants and creates the master.m3u8 file. 
 608 Closed captions are extracted and converted to webvtt segment files.
 
-The following values are read from each finished variant to insure accuracy in the master.m3u8.
-
-* Bandwidth, 
-* Resolution
-* Level
-* Profile
-* Codecs 
+The values below are read and /or calculated for each variant. 
+* Bandwidth ( bit_rate is parsed the mpegts container ) 
+* Resolution ( width and height for the video resolution are parsed from the video stream) 
+* Level     ( video level is parsed from the video stream )
+* Profile  (video profile is parsed from the video stream, audio profile from the audio stream)
+* Codecs  (Calculated as described https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/FrequentlyAskedQuestions/FrequentlyAskedQuestions.html )
+```
+#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\""
+```
 
 ## ``` Quick Start```
 
