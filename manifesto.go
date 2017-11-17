@@ -13,9 +13,39 @@ import (
 	"time"
 )
 
-var x264level = "3.0"
-var x264profile = "high"
-var mastercodec = "avc1.64001E,mp4a.40.2"
+
+x264Profiles := map[string]string{"Baseline":"42","Main": "4d","High": "64"}
+AudioProfiles := map[string]string{"HE-AACv2":"mp4a.40.5","LC":"mp4a.40.2"}
+	
+
+type Format struct{
+	FormatName 	string	`json:"format_name"`
+	Duration	string	`json:"duration"`
+	BitRate		string	`json:"bit_rate"`
+}	
+
+type Stream struct {
+CodecType 	string 	`json:"codec_type"`
+CodecName	string 	`json:"codec_name"`
+Profile 	string	`json:"profile"`	
+Level		float64	`json:"level"`
+Width		float64	`json:"width"`
+Height		float64	`json:"height"`	
+	
+}		
+
+type Container struct {
+Streams	[]Stream	`json:"streams"`
+Format	Format		`json:"format"`	
+}	
+
+type Stanza struct { 
+Bandwidth	string
+Resolution	string
+Level		float64
+Profile		string
+AProfile	string
+}
 
 type Job struct {
 	InFile      string
@@ -224,7 +254,7 @@ func (v *Variant) mkCmd(CmdTemplate string) string {
 	return cmd
 }
 
-// Read actual bitrate from first segment to set bandwidth in master.m3u8
+/** Read actual bitrate from first segment to set bandwidth in master.m3u8
 func (v *Variant) readRate() {
 	cmd := fmt.Sprintf("ffprobe -i %s/%s/index0.ts", v.job.TopLevel, v.Name)
 	data := chkExec(cmd)
@@ -232,7 +262,7 @@ func (v *Variant) readRate() {
 	rate := strings.Split(two, " kb/s")[0]
 	v.Bandwidth = fmt.Sprintf("%v000", rate)
 }
-
+**/
 // Start transcoding the variant
 func (v *Variant) start() {
 	v.mkDest()
@@ -249,9 +279,27 @@ func (v *Variant) start() {
 // #EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=7483000,RESOLUTION=1920:1080,
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
-	stanza := fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%v,CODECS=\"%s\"", v.Bandwidth, v.Aspect, mastercodec)
-	if v.job.AddSubs {
-		stanza = fmt.Sprintf("%s,SUBTITLES=\"WebVtt\"", stanza)
+	cmd := fmt.Sprintf(ffprobe -i %s/%s/index0.ts -show_streams -show_format -print_format json", v.job.TopLevel, v.Name)
+	data := chkExec(cmd)	
+	var st Stanza						
+	var f Container
+	json.Unmarshal(data, &f)
+
+	st.Bandwidth=f.Format.BitRate
+	for _,i := range f.Streams{	
+		if i.CodecType=="video" {
+			st.Resolution= fmt.Sprintf("=%vx%v",i.Width,i.Height)
+			st.Profile=x264Profiles[i.Profile]
+			st.Level=i.Level
+			}
+		if i.CodecType=="audio" {
+			st.AProfile=","+AudioProfiles[i.Profile]	
+		}
+	}
+	return fmt.Sprintf("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\"\n",st.Bandwidth,st.Resolution,st.Profile,int(st.Level),st.AProfile)
+
+	//if v.job.AddSubs {
+	//	stanza = fmt.Sprintf("%s,SUBTITLES=\"WebVtt\"", stanza)
 	}
 	return stanza
 }
