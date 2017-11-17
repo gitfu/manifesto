@@ -37,15 +37,6 @@ go build manifesto.go
 Manifesto transcodes and segments video into multiple variants and creates the master.m3u8 file. 
 608 Closed captions are extracted and converted to webvtt segment files.
 
-The values below are read and /or calculated for each variant. 
-* Bandwidth ( bit_rate is parsed the mpegts container ) 
-* Resolution ( width and height for the video resolution are parsed from the video stream) 
-* Level     ( video level is parsed from the video stream )
-* Profile  (video profile is parsed from the video stream, audio profile from the audio stream)
-* Codecs  (Calculated as described https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/FrequentlyAskedQuestions/FrequentlyAskedQuestions.html )
-```
-#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\""
-```
 
 ## ``` Quick Start```
 
@@ -138,4 +129,17 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 * Newlines are stripped. 
 
  
+ ## Values in the master.m3u8 file
+ 
+The values used in the master.m3u8 file are read an /or calculated for each variant 
+as follows.
+
+* Bandwidth ( bit_rate is parsed the mpegts container ) 
+* Resolution ( width and height for the video resolution are parsed from the video stream) 
+* Level     ( video level is parsed from the video stream )
+* Profile  (video profile is parsed from the video stream, audio profile from the audio stream)
+* Codecs  (Calculated as described here  https://developer.apple.com/library/content/documentation/NetworkingInternet/Conceptual/StreamingMediaGuide/FrequentlyAskedQuestions/FrequentlyAskedQuestions.html )
+```
+#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%v,RESOLUTION=%s,CODECS=\"avc1.%v00%x%v\""
+```
 
