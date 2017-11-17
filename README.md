@@ -123,9 +123,10 @@ index0.vtt  index1.vtt  index2.vtt  index3.vtt  index4.vtt  index_vtt.m3u8
 ]
 ```
 
-
-
-
+## ```Modifying The Ffmpeg Command```
+* cmd.template is the default ffmeg command template 
+* NAME,ASPECT,FRAMERATE,VBITRATE,BUFSIZE,ABITRATE will be replaced with variant's values from hls.json.
+* Newlines are stripped. 
 
  
 
