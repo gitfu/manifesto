@@ -266,7 +266,9 @@ func (v *Variant) start() {
 // hd1920/index.m3u8
 func (v *Variant) mkStanza() string {
 	cmd := fmt.Sprintf("ffprobe -hide_banner -i %s/%s/index0.ts -show_streams -show_format -print_format json ", v.job.TopLevel, v.Name)
-	data := (chkExec(cmd))
+	parts := strings.Fields(cmd)
+	data, err := exec.Command(parts[0], parts[1:]...).Output()
+	chk(err, fmt.Sprintf("Error running \n %s \n %v", cmd, string(data)))
 	var st Stanza
 	var f Container
 	json.Unmarshal(data, &f)
@@ -294,7 +296,7 @@ func (v *Variant) mkStanza() string {
 func chkExec(cmd string) []byte {
 	// Executes external commands and checks for runtime errors
 	parts := strings.Fields(cmd)
-	data, err := exec.Command(parts[0], parts[1:]...).Output()
+	data, err := exec.Command(parts[0], parts[1:]...).CombinedOutput()
 	chk(err, fmt.Sprintf("Error running \n %s \n %v", cmd, string(data)))
 	return data
 }
