@@ -1,5 +1,5 @@
 [
-{"name": "med768", "aspect": "768x432", "framerate":"29.97","vbitrate": "900","bufsize":"1100","abitrate": "96k"}
-,{"name": "hd720", "aspect": "1280x720", "framerate":"29.97","vbitrate": "1500","bufsize":"1500","abitrate": "96k"}
-,{"name": "low640", "aspect": "640x360", "framerate":"29.97","vbitrate": "630","bufsize":"960","abitrate": "64k"}
-]
+{"name": "med768", "aspect": "768x432", "framerate":"29.97","vbitrate": "900","bufsize":"100","abitrate": "32k"}
+,{"name": "hd720", "aspect": "1280x720", "framerate":"29.97","vbitrate": "1500","bufsize":"150","abitrate": "32k"}
+,{"name": "low640", "aspect": "640x360", "framerate":"29.97","vbitrate": "630","bufsize":"50","abitrate": "32k"}
+  ]
