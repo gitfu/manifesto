@@ -148,7 +148,7 @@ func (j *Job) mkSubStanza() string {
 	one := "#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"WebVtt\","
 	two := "NAME=\"English\",DEFAULT=YES,AUTOSELECT=YES,FORCED=NO,"
 	line := j.mkLine()
-	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/vtt_index.m3u8\"\n", line)
+	three := fmt.Sprintf("LANGUAGE=\"en\",URI=\"%ssubs/index_vtt.m3u8\"\n", line)
 	return one + two + three
 }
 
