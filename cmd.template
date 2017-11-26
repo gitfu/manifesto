@@ -8,7 +8,7 @@ INPUTS
 -pix_fmt yuv420p 
 -x264-params vbv-bufsize=BUFSIZE:vbv-maxrate=VBITRATE:nal_hrd=cbr:force-cfr=1:no-scenecut=1:bitrate=VBITRATE:keyint=60:min-keyint=60  
 -c:a libfdk_aac -profile:a aac_he_v2 -b:a 32k
--hls_time 2
+-hls_time 6
 -hls_list_size 0  
 TOPLEVEL/NAME/index.m3u8
 
