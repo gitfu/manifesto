@@ -63,7 +63,7 @@ func (j *Job) mkFlags() {
 	flag.StringVar(&j.SubFile, "s", "", "subtitle file to segment (optional)")
 	flag.StringVar(&j.TopLevel, "d", "", "override top level directory for hls files (optional)")
 	flag.StringVar(&j.JasonFile, "j", `./hls.json`, "JSON file of variants (optional)")
-	flag.BoolVar(&j.AddSubs ,"no-subs", true, "do not add subtitles")
+	flag.BoolVar(&j.AddSubs ,"no-subs", false, "do not add subtitles")
 	flag.StringVar(&j.CmdTemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&j.UrlPrefix, "u", "", "url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
@@ -133,14 +133,14 @@ func (j *Job) mvSubtitles(vardir string) {
 // Extract captions to segment,
 // unless a subtitle file is passed in with "-s"
 func (j *Job) mkSubfile() {
-	j.AddSubs = false
+//	j.AddSubs = false
 	if !(j.WebVtt) {
 		if (j.SubFile == "") && (j.hasCaptions()) {
 			j.extractCaptions()
 		}
-		if j.SubFile != "" {
-			j.AddSubs = true
-		}
+	//	if j.SubFile != "" {
+	//		j.AddSubs = true
+	//	}
 	}
 }
 
