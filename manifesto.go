@@ -135,7 +135,7 @@ func (j *Job) mvSubtitles(vardir string) {
 // unless a subtitle file is passed in with "-s"
 func (j *Job) mkSubfile() {
 //	j.AddSubs = false
-	if !(j.WebVtt) {
+	if (j.AddSubs)  && !(j.WebVtt) {
 		if (j.SubFile == "") && (j.hasCaptions()) {
 			j.extractCaptions()
 		}
