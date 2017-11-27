@@ -63,6 +63,7 @@ func (j *Job) mkFlags() {
 	flag.StringVar(&j.SubFile, "s", "", "subtitle file to segment (optional)")
 	flag.StringVar(&j.TopLevel, "d", "", "override top level directory for hls files (optional)")
 	flag.StringVar(&j.JasonFile, "j", `./hls.json`, "JSON file of variants (optional)")
+	flag.Bool(&j.AddSubs, "no-subs", `ns`, "do not add subtitles (optional)")
 	flag.StringVar(&j.CmdTemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&j.UrlPrefix, "u", "", "url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
@@ -156,14 +157,17 @@ func (j *Job) mkSubStanza() string {
 func (j *Job) mkAll() {
 	fmt.Println(Cyan(" ."), "video file   :", Cyan(j.InFile))
 	fmt.Println(Cyan(" ."), "TopLeveldir :", Cyan(j.TopLevel))
-	j.mkSubfile()
+	if j.AddSubs{
+		j.mkSubfile()
+		fmt.Println(Cyan(" ."), "subtitle file:", Cyan(j.SubFile))
+
+	}	
 	var m3u8Master = fmt.Sprintf("%s/master.m3u8", j.TopLevel)
 	fp, err := os.Create(m3u8Master)
 	chk(err, "in mkAll")
 	defer fp.Close()
 	w := bufio.NewWriter(fp)
 	w.WriteString("#EXTM3U\n")
-	fmt.Println(Cyan(" ."), "subtitle file:", Cyan(j.SubFile))
 	j.mkIncomplete()
 	for _, v := range j.Variants {
 		v.job = j
