@@ -63,7 +63,7 @@ func (j *Job) mkFlags() {
 	flag.StringVar(&j.SubFile, "s", "", "subtitle file to segment (optional)")
 	flag.StringVar(&j.TopLevel, "d", "", "override top level directory for hls files (optional)")
 	flag.StringVar(&j.JasonFile, "j", `./hls.json`, "JSON file of variants (optional)")
-	flag.Bool(&j.AddSubs, "no-subs", `ns`, "do not add subtitles (optional)")
+	flag.Bool(&j.AddSubs, "no-subs", false, "do not add subtitles (optional)")
 	flag.StringVar(&j.CmdTemplate, "t", `./cmd.template`, "command template file (optional)")
 	flag.StringVar(&j.UrlPrefix, "u", "", "url prefix to add to index.m3u8 path in master.m3u8 (optional)")
 	flag.Parse()
