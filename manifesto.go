@@ -59,6 +59,7 @@ type Job struct {
 }
 
 func (j *Job) mkFlags() {
+	&j.AddSubs = true
 	flag.StringVar(&j.InFile, "i", "", "Video file to segment (either -i or -b is required)")
 	flag.StringVar(&j.SubFile, "s", "", "subtitle file to segment (optional)")
 	flag.StringVar(&j.TopLevel, "d", "", "override top level directory for hls files (optional)")
